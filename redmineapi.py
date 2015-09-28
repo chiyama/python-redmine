@@ -223,7 +223,7 @@ class Redmine(object):
         logger.info(api_url)
         try:
             h = httplib2.Http(disable_ssl_certificate_validation=self.easy_ssl)
-            if params is not None:
+            if params is not None and 'issue' in params.keys():
                 params['issue']['redmine'] = ''
             resp, content = h.request(api_url,
                           'POST',
@@ -336,8 +336,16 @@ class Redmine(object):
             results = json.loads(self.redmine._apiGet('users', kwargs))
             return [User(u) for u in results['users']]
 
+        def new(self, user):
+            if user is None:
+                raise RedmineApiError("You must provide an User Object or a dictionary")
+            if isinstance(user, User):
+                new_user = {'user': user.__dict__}
+            else:
+                new_user = {'user': user }
+            content = self.redmine._apiPost('users', new_user)
+
+
     @property
     def users(self):
         return self._users(self)
-    
-    
